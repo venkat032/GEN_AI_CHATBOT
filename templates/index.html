@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>GenAI Chatbot</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(-45deg, #0f2027, #203a43, #2c5364, #1c1c1c);
+            background-size: 400% 400%;
+            animation: gradientBG 10s ease infinite;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .chat-wrapper {
+            width: 500px;
+            height: 650px;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 40px rgba(0, 255, 255, 0.3);
+            overflow: hidden;
+        }
+
+        .chat-header {
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 20px;
+            color: #00ffff;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .chat-box {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .message {
+            max-width: 75%;
+            padding: 10px 15px;
+            border-radius: 20px;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .user {
+            align-self: flex-end;
+            background: linear-gradient(45deg, #00ffff, #ff00ff);
+            color: white;
+        }
+
+        .bot {
+            align-self: flex-start;
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .input-area {
+            display: flex;
+            padding: 10px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .input-area input {
+            flex: 1;
+            padding: 10px;
+            border-radius: 20px;
+            border: none;
+            outline: none;
+            font-size: 14px;
+        }
+
+        .input-area button {
+            margin-left: 10px;
+            padding: 10px 20px;
+            border-radius: 20px;
+            border: none;
+            cursor: pointer;
+            background: linear-gradient(45deg, #00ffff, #ff00ff);
+            color: white;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .input-area button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px #ff00ff;
+        }
+
+        /* Scrollbar styling */
+        .chat-box::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .chat-box::-webkit-scrollbar-thumb {
+            background: #00ffff;
+            border-radius: 10px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="chat-wrapper">
+    <div class="chat-header">🤖 My GenAI Chatbot</div>
+
+    <div class="chat-box" id="chatBox">
+        <div class="message bot">Hello 👋 Ask me anything!</div>
+    </div>
+
+    <div class="input-area">
+        <input type="text" id="messageInput" placeholder="Type your message...">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+</div>
+
+<script>
+const input = document.getElementById("messageInput");
+
+// Send message when Enter is pressed
+input.addEventListener("keypress", function(event) {
+    if (event.key === "Enter") {
+        event.preventDefault();
+        sendMessage();
+    }
+});
+
+function sendMessage() {
+    const message = input.value.trim();
+    if (message === "") return;
+
+    const chatBox = document.getElementById("chatBox");
+
+    // Add user message
+    const userMsg = document.createElement("div");
+    userMsg.className = "message user";
+    userMsg.innerText = message;
+    chatBox.appendChild(userMsg);
+
+    input.value = "";
+
+    // Scroll to bottom
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    // Send to Flask backend
+    fetch("/chat", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ message: message })
+    })
+    .then(response => response.json())
+    .then(data => {
+        const botMsg = document.createElement("div");
+        botMsg.className = "message bot";
+        botMsg.innerText = data.reply;
+        chatBox.appendChild(botMsg);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    });
+}
+</script>
+
+</body>
+</html>
