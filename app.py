@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, session, jsonify
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
-from langchain.prompts import PromptTemplate
+from langchain_core.prompts import PromptTemplate
 from langchain.chains import RetrievalQA
 import os
 from dotenv import load_dotenv
