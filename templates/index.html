@@ -137,7 +137,7 @@
 <script>
 const input = document.getElementById("messageInput");
 
-// Send message when Enter is pressed
+// Enter key support
 input.addEventListener("keypress", function(event) {
     if (event.key === "Enter") {
         event.preventDefault();
@@ -151,7 +151,7 @@ function sendMessage() {
 
     const chatBox = document.getElementById("chatBox");
 
-    // Add user message
+    // USER MESSAGE
     const userMsg = document.createElement("div");
     userMsg.className = "message user";
     userMsg.innerText = message;
@@ -159,10 +159,16 @@ function sendMessage() {
 
     input.value = "";
 
-    // Scroll to bottom
     chatBox.scrollTop = chatBox.scrollHeight;
 
-    // Send to Flask backend
+    // TYPING INDICATOR
+    const typingMsg = document.createElement("div");
+    typingMsg.className = "message bot";
+    typingMsg.innerText = "Typing...";
+    chatBox.appendChild(typingMsg);
+
+    chatBox.scrollTop = chatBox.scrollHeight;
+
     fetch("/chat", {
         method: "POST",
         headers: {
@@ -172,11 +178,27 @@ function sendMessage() {
     })
     .then(response => response.json())
     .then(data => {
+
+        // remove typing
+        typingMsg.remove();
+
         const botMsg = document.createElement("div");
         botMsg.className = "message bot";
-        botMsg.innerText = data.reply;
         chatBox.appendChild(botMsg);
-        chatBox.scrollTop = chatBox.scrollHeight;
+
+        const words = data.reply.split(" ");
+        let i = 0;
+
+        function typeWord() {
+            if (i < words.length) {
+                botMsg.innerHTML += words[i] + " ";
+                i++;
+                chatBox.scrollTop = chatBox.scrollHeight;
+                setTimeout(typeWord, 40); // typing speed
+            }
+        }
+
+        typeWord();
     });
 }
 </script>
