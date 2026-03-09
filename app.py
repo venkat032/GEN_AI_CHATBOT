@@ -12,7 +12,9 @@ app = Flask(__name__)
 app.secret_key = "genai123"
 
 
-embeddings = OpenAIEmbeddings()
+embeddings = OpenAIEmbeddings(
+    model="text-embedding-3-small"
+)
 
 
 vectorstore = FAISS.load_local(
